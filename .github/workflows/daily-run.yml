@@ -1,0 +1,32 @@
+name: Daily Python Script Run
+
+on:
+  schedule:
+    # Runs at 10:00 AM UTC every day
+    - cron: '30 14 * * *'
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Install dependencies (if any)
+      - name: Install Dependencies
+        run: |
+          pip install -r dependencies.txt
+
+      # Run the Python scripts
+      - name: Run Python Scripts
+        run: |
+          Golden Cross Finder.py
+          Email Sender.py
