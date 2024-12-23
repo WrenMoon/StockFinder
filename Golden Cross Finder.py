@@ -87,7 +87,7 @@ def golden_cross_scanner(min_market_cap, lookback_days):
 
 # User-defined parameters
 min_market_cap = 1000  # Minimum market cap in INR
-lookback_days = 20  # Lookback period for golden cross detection
+lookback_days = 10  # Lookback period for golden cross detection
 
 # Run the scanner
 goldencrosses = golden_cross_scanner(min_market_cap, lookback_days)
