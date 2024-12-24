@@ -28,5 +28,5 @@ jobs:
       # Run the Python scripts
       - name: Run Python Scripts
         run: |
-          Golden Cross Finder.py
-          Email Sender.py
+          python "Golden Cross Finder.py"
+          python "Email Sender.py"
