@@ -14,6 +14,14 @@ goldenCross = goldenCross.groupby(goldenCross.columns[0]).agg(lambda x: combine_
 dropCross = dropCross.groupby(dropCross.columns[0]).agg(lambda x: combine_values(x)).reset_index()
 crossDates = pd.merge(goldenCross, dropCross, on='Company Name', how='outer')
 
+duplicate_columns = crossDates.columns[crossDates.columns.duplicated(keep=False)].unique()
+
+for col in duplicate_columns:
+    same_cols = crossDates.loc[:, crossDates.columns == col]
+    crossDates[col] = same_cols.bfill(axis=1).iloc[:, 0]
+
+    crossDates = crossDates.drop(columns=same_cols.columns.difference([col]))
+
 date = datetime.now().date()
 date_string = date.strftime("%Y_%m_%d")
 
