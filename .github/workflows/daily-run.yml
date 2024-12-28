@@ -28,4 +28,6 @@ jobs:
       - name: Run Python Scripts
         run: |
           python "Golden Cross Finder.py"
+          python "Drop Cross Finder.py"
+          python "CSV Manager.py"
           python "Email Sender.py"
