@@ -78,8 +78,9 @@ min_market_cap = config["min_market_cap"]
 
 # Run the scanner
 goldencrosses = golden_cross_scanner(min_market_cap, lookback_days)
-results = goldencrosses.drop(goldencrosses.columns[0], axis=1)
-
-
+if not goldencrosses.empty:
+    results = goldencrosses.drop(goldencrosses.columns[0], axis=1)
+else:
+    results = goldencrosses
 
 results.to_csv('Data/golden_cross_results.csv', index=False)

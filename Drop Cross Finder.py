@@ -78,6 +78,9 @@ min_market_cap = config["min_market_cap"]
 
 # Run the scanner
 dropcrosses = drop_cross_scanner(min_market_cap, lookback_days)
-results = dropcrosses.drop(dropcrosses.columns[0], axis=1)
+if not dropcrosses.empty:
+    results = dropcrosses.drop(dropcrosses.columns[0], axis=1)
+else:
+    results = dropcrosses
 
-results.to_csv('Data/drop_cross_results.csv', index=False)
+results.to_csv('Data/golden_cross_results.csv', index=False)
