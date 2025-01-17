@@ -4,5 +4,4 @@ Currently included factors.
 
 1) Golden Cross Dates
 2) Drop Cross Dates
-3) Mutual Fund Holding Monthly Change
 
