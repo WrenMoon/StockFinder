@@ -16,7 +16,7 @@ emails_df = pd.read_csv(email_csv_path)
 receiver_emails = emails_df['email'].tolist()  # Change 'email' to your column name
 
 # Email subject
-subject = "Stock data of NIFTY500 Companies: Golden Cross Dates, Drop Cross Dates, Mutual Fund Holding Monthly Change %"
+subject = "Stock data of NIFTY500 Companies: Golden Cross Dates, Drop Cross Dates"
 
 # List of file paths to attach
 date = datetime.now().date()
