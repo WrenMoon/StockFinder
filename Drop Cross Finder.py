@@ -13,13 +13,13 @@ def fetch_stock_data(all_data, ticker):
     return stock_data
 
 
-def identify_golden_cross(stock_data):
-    golden_cross_dates = []
+def identify_drop_cross(stock_data):
+    drop_cross_dates = []
     for i in range(1, len(stock_data)):
         if stock_data['7_day_MA'].iloc[i] < stock_data['21_day_MA'].iloc[i] and \
            stock_data['7_day_MA'].iloc[i-1] >= stock_data['21_day_MA'].iloc[i-1]:
-            golden_cross_dates.append(stock_data.index[i])
-    return golden_cross_dates
+            drop_cross_dates.append(stock_data.index[i])
+    return drop_cross_dates
 
 
 def fetch_additional_info(ticker, info_cache, lock):
@@ -40,10 +40,10 @@ def fetch_additional_info(ticker, info_cache, lock):
 def process_ticker(ticker, all_data, lookback_days, info_cache, lock):
     try:
         stock_data = fetch_stock_data(all_data, ticker)
-        golden_cross_dates = identify_golden_cross(stock_data)
+        drop_cross_dates = identify_drop_cross(stock_data)
 
         recent_crosses = []
-        for date in golden_cross_dates:
+        for date in drop_cross_dates:
             if date >= datetime.today() - timedelta(days=lookback_days):
                 info = fetch_additional_info(ticker, info_cache, lock)
                 recent_crosses.append({
@@ -51,7 +51,7 @@ def process_ticker(ticker, all_data, lookback_days, info_cache, lock):
                     'Company Name': info['Company Name'],
                     'Market Cap (crores)': info['Market Cap (crores)'],
                     'Share Price (rupees)': info['Share Price (rupees)'],
-                    'Golden Cross Date': date.strftime('%Y-%m-%d')
+                    'Drop Cross Date': date.strftime('%Y-%m-%d')
                 })
         return recent_crosses
     except Exception as e:
@@ -59,7 +59,7 @@ def process_ticker(ticker, all_data, lookback_days, info_cache, lock):
         return []
 
 
-def golden_cross_scanner(min_market_cap, lookback_days):
+def drop_cross_scanner(min_market_cap, lookback_days):
     end_date = datetime.today().strftime('%Y-%m-%d')
     start_date = (datetime.today() - timedelta(days=lookback_days + 21)).strftime('%Y-%m-%d')
 
@@ -92,10 +92,10 @@ lookback_days = config["lookback_days"]
 min_market_cap = config["min_market_cap"]
 
 # Run the scanner
-goldencrosses = golden_cross_scanner(min_market_cap, lookback_days)
-if not goldencrosses.empty:
-    results = goldencrosses.drop(goldencrosses.columns[0], axis=1)
+dropcrosses = drop_cross_scanner(min_market_cap, lookback_days)
+if not dropcrosses.empty:
+    results = dropcrosses.drop(dropcrosses.columns[0], axis=1)
 else:
-    results = goldencrosses
+    results = dropcrosses
 
 results.to_csv('Data/drop_cross_results.csv', index=False)
