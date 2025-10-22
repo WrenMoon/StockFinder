@@ -1,4 +1,4 @@
 {
-    "lookback_days": 10,
+    "lookback_days": 100,
     "min_market_cap": 1000
 }
