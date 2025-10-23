@@ -2,33 +2,68 @@ name: Daily Python Script Run
 
 on:
   schedule:
-    - cron: '30 16 * * *'
+    - cron: '30 16 * * *'  # Daily at 16:30 UTC
   workflow_dispatch:
 
 jobs:
-  run-scripts:
+  generate-data:
+    name: Generate CSVs
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the repository
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Set up Python environment
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      # Install dependencies (if any)
       - name: Install Dependencies
-        run: |
-          pip install -r dependencies.txt
+        run: pip install -r dependencies.txt
 
-      # Run the Python scripts
-      - name: Run Python Scripts
+      - name: Run Data Generators
         run: |
           python "Golden Cross Finder.py"
           python "Drop Cross Finder.py"
-          python "CSV Manager.py"
-          python "Email Sender.py"
+
+      - name: List generated CSVs (debug)
+        run: ls -al Data || echo "No Data directory found"
+
+      - name: Upload CSV artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-data
+          path: Data/*.csv
+          if-no-files-found: error  # fail early if nothing uploaded
+          retention-days: 1         # artifacts are only needed for this run
+
+  process-and-email:
+    name: Process CSVs and Email
+    needs: generate-data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install -r dependencies.txt
+
+      - name: Download CSV artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: stock-data
+          path: Data/
+
+      - name: Verify downloaded CSVs (debug)
+        run: ls -al Data
+
+      - name: Run CSV Manager
+        run: python "CSV Manager.py"
+
+      - name: Send Email
+        run: python "Email Sender.py"
