@@ -7,18 +7,23 @@ from datetime import datetime
 import pandas as pd
 import os
 import json
+import sys
 
 # Load lookback_days from config
 with open("Data/config.json", "r") as f:
     config = json.load(f)
 lookback_days = config.get("lookback_days", None)
 
-# Email details
-sender_email = "goldencrossemailsender@gmail.com"
-password = "grsb oohc kiru ayyi"  # Use App Password
+# Read sender and password from environment
+sender_email = os.environ.get("SENDER_EMAIL")
+password = os.environ.get("EMAIL_PASSWORD")
 
-# Read email addresses from CSV
-email_csv_path = "Data/email_list.csv"  # CSV must contain a column named 'email'
+if not sender_email or not password:
+    print("Missing SENDER_EMAIL or EMAIL_PASSWORD environment variables.")
+    sys.exit(1)
+
+# Read email addresses from CSV (must contain a column named 'email')
+email_csv_path = "Data/email_list.csv"
 emails_df = pd.read_csv(email_csv_path)
 receiver_emails = emails_df['email'].dropna().astype(str).tolist()
 
@@ -35,29 +40,26 @@ attachment_error = None
 if os.path.exists(result_csv_path):
     try:
         df = pd.read_csv(result_csv_path)
-        # We consider "has_rows" if there is at least one data row (headers alone don't count)
         has_rows = (df is not None) and (not df.empty)
     except pd.errors.EmptyDataError:
         has_rows = False
     except Exception as e:
-        # If there's some other error reading, treat as no data and keep the error for logging
         has_rows = False
         attachment_error = f"Error reading results CSV: {e}"
 else:
     has_rows = False
 
 # Compose email body depending on data availability
+lookback_phrase = f"the last {lookback_days} days" if lookback_days is not None else "the recent lookback window"
+
 if has_rows:
-    lookback_phrase = f"the last {lookback_days} days" if lookback_days is not None else "the recent lookback window"
     body_text = (
         "Hello,\n\n"
-        "Please find attached the daily stock data for NIFTY500 companies that formed a Golden Cross or Drop Cross within {lookback_phrase}.\n"
+        f"Please find attached the daily stock data for NIFTY500 companies that formed a Golden Cross or Drop Cross within {lookback_phrase}.\n"
         f"Attachment: {os.path.basename(result_csv_path)}\n\n"
         "Regards,\nStockFinder"
     )
 else:
-    # Fall back to a generic message if lookback_days is missing
-    lookback_phrase = f"the last {lookback_days} days" if lookback_days is not None else "the recent lookback window"
     body_text = (
         "Hello,\n\n"
         f"There are no NIFTY500 companies that formed a Golden Cross or Drop Cross within {lookback_phrase}.\n"
