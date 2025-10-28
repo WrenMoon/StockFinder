@@ -15,10 +15,12 @@ def fetch_stock_data(all_data, ticker):
 
 def identify_golden_cross(stock_data):
     golden_cross_dates = []
-    for i in range(1, len(stock_data)):
-        if stock_data['7_day_MA'].iloc[i] > stock_data['21_day_MA'].iloc[i] and \
-           stock_data['7_day_MA'].iloc[i-1] <= stock_data['21_day_MA'].iloc[i-1]:
-            golden_cross_dates.append(stock_data.index[i])
+    valid_data = stock_data.dropna(subset=['7_day_MA', '21_day_MA'])
+    
+    for i in range(1, len(valid_data)):
+        if valid_data['7_day_MA'].iloc[i] > valid_data['21_day_MA'].iloc[i] and \
+           valid_data['7_day_MA'].iloc[i-1] <= valid_data['21_day_MA'].iloc[i-1]:
+            golden_cross_dates.append(valid_data.index[i])
     return golden_cross_dates
 
 
@@ -61,7 +63,7 @@ def process_ticker(ticker, all_data, lookback_days, info_cache, lock):
 
 def golden_cross_scanner(min_market_cap, lookback_days):
     end_date = datetime.today().strftime('%Y-%m-%d')
-    start_date = (datetime.today() - timedelta(days=lookback_days + 21)).strftime('%Y-%m-%d')
+    start_date = (datetime.today() - timedelta(days=lookback_days + 40)).strftime('%Y-%m-%d')
 
     filtered_ticker_csv = pd.read_csv("Data/Filtered_Tickers.csv")
     tickers = filtered_ticker_csv['ticker'].tolist()
